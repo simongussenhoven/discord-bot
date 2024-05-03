@@ -41,7 +41,6 @@ const setAlive = () => {
   client.user.setPresence({ status: "online"})
   serverStatus = `Server is alive (${new Date().toISOString().spl})`;
   client.user.setActivity("server is alive", { type: ActivityType.Custom });
-  console.log("Server is alive");
 };
 
 const setDown = () => {
@@ -49,12 +48,11 @@ const setDown = () => {
   serverStatus = "Server is down";
   client.user.setPresence({ status: "idle"})
   client.user.setActivity(`Server is down (${new Date().toISOString()})`, { type: ActivityType.Custom });
-  console.log(`Server is down (${new Date().toISOString()})`);
 };
 
 // polling server
 console.log('Start polling')
-setInterval(() => {
+const regularPolling = setInterval(() => {
   const session = ping.createSession(options);
   session.pingHost("192.168.2.99", (error, target) => {
     if (error) {
@@ -63,12 +61,9 @@ setInterval(() => {
       return;
     }
     console.log(`Server is alive (${new Date().toISOString()})`);
-    serverIsStarting = false
     setAlive();
   });
 }, 15000);
-
-// function to check if the server is alive
 
 client.on("messageCreate", async (message) => {
   console.log("Message received", message.content);
