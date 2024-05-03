@@ -1,6 +1,15 @@
 {
+  "scripts": {
+    "start": "pm2 node bot.js"
+  },
   "dependencies": {
+    "cross-spawn": "^7.0.3",
     "discord.js": "^14.14.1",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "net-ping": "^1.2.4",
+    "wakeonlan": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
   }
 }
