@@ -1,9 +1,9 @@
 const { Client, GatewayIntentBits, ActivityType } = require("discord.js");
 const dotenv = require("dotenv");
 const wol = require("wakeonlan");
-// const spawn = require("cross-spawn");
-// const exec = require("child_process").exec;
 const ping = require("net-ping");
+const { Client: SshClient } = require('ssh2');
+
 dotenv.config();
 
 const client = new Client({
@@ -26,6 +26,13 @@ const options = {
   ttl: 128,
 };
 
+const sshConfig = {
+  host: '192.168.2.99',
+  port: 22, // Default SSH port
+  username: 'sshuser',
+  password: process.env.SSH_PASS
+};
+
 // client starting
 client.once("ready", () => {
   console.log("Starting bot...");
@@ -33,22 +40,66 @@ client.once("ready", () => {
 client.login(process.env.TOKEN);
 
 // when the bot starts, the server status is unknown
-let serverStatus = "Server status unknown";
-let serverIsStarting = false
+let serverStatus = "unknown";
+let channel = null;
 
-const setAlive = () => {
-  if (serverStatus === "Server is alive") return;
-  client.user.setPresence({ status: "online"})
-  serverStatus = `Server is alive (${new Date().toISOString().spl})`;
-  client.user.setActivity("server is alive", { type: ActivityType.Custom });
+// set the server status to online
+const setOnline = () => {
+  if (serverStatus === "Server is online" || serverStatus === "Server is stopping...") return;
+  client.user.setPresence({ status: "online" })
+  client.user.setActivity("Server is online", { type: ActivityType.Custom });
+  serverStatus = `Server is online`;
+  if (!channel) return
+  channel.send("Server is online!");
 };
 
-const setDown = () => {
-  if (serverStatus === "Server is down") return;
-  serverStatus = "Server is down";
+// set the server status to offline
+const setOffline = () => {
+  if (serverStatus === "Server is offline" || serverStatus === "Server is starting...") return;
   client.user.setPresence({ status: "idle"})
-  client.user.setActivity(`Server is down (${new Date().toISOString()})`, { type: ActivityType.Custom });
+  client.user.setActivity(`Server is offline`, { type: ActivityType.Custom });
+  serverStatus = "Server is offline";
+  if (!channel) return
+  channel.send("Server is offline!");
 };
+
+// set the server status to restarting
+const setStarting = () => {
+  if (serverStatus === "Server is starting") return;
+  client.user.setActivity("Server is starting...", { type: ActivityType.Custom });
+  serverStatus = "Server is starting...";
+}
+
+// set the server status to stopping
+const setStopping = () => {
+  if (serverStatus === "Server is stopping") return;
+  client.user.setActivity("Server is stopping...", { type: ActivityType.Custom });
+  serverStatus = "Server is stopping...";
+}
+
+// shutdown the server
+const shutDown = () => {
+  const sshClient = new SshClient();
+  sshClient.on('ready', () => {
+    sshClient.exec('sudo -i shutdown now', (err, stream) => {
+      if (err) {
+        channel.send("Error shutting down server: " + err);
+        console.error('Error:', err);
+      };
+      stream.on('close', (code, signal) => {
+        client.user.setActivity("Server is shutting down...", { type: ActivityType.Custom });
+        console.log(`Stream closed with code ${code} and signal ${signal}`);
+        sshClient.end();
+      });
+    });
+  }).connect(sshConfig);
+}
+
+// catch ssh error
+client.on('error', (err) => {
+  console.error('Error:', err);
+});
+
 
 // polling server
 console.log('Start polling')
@@ -56,17 +107,18 @@ const regularPolling = setInterval(() => {
   const session = ping.createSession(options);
   session.pingHost("192.168.2.99", (error, target) => {
     if (error) {
-      console.log(`Server is down (${new Date().toISOString()})`);
-      setDown();
+      console.log(`Server is offline (${new Date().toISOString()})`);
+      setOffline();
       return;
     }
-    console.log(`Server is alive (${new Date().toISOString()})`);
-    setAlive();
+    console.log(`Server is online (${new Date().toISOString()})`);
+    setOnline();
   });
 }, 15000);
 
+// handle messages
 client.on("messageCreate", async (message) => {
-  console.log("Message received", message.content);
+  channel = message.channel;
   if (message.content === "!ping") {
     message.channel.send("Pong.");
   }
@@ -82,14 +134,16 @@ client.on("messageCreate", async (message) => {
     **!restart** - Restart the server`);
   }
   if (message.content === "!start") {
-    client.user.setActivity("server starting", { type: ActivityType.Custom });
     wol("60:45:CB:86:3C:C6").then(() => {
       message.channel.send("Starting server, please wait...");
       serverIsStarting = true
     });
+    setStarting();
   }
   if (message.content === "!stop") {
     message.channel.send("Stopping the server...");
+    setStopping();
+    shutDown();
   }
   if (message.content === "!restart") {
     message.channel.send("Restarting the server...");
