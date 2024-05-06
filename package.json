@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "pm2 node bot.js"
+    "start": "pm2 start bot.js"
   },
   "dependencies": {
     "cross-spawn": "^7.0.3",
