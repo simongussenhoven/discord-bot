@@ -6,6 +6,16 @@ const { Client: SshClient } = require('ssh2');
 
 dotenv.config();
 
+if (!process.env.TOKEN) {
+  console.error("Please provide a valid Discord token.");
+  process.exit(1);
+}
+
+if (!process.env.SSH_PASS) {
+  console.error("Please provide a valid SSH password.");
+  process.exit(1);
+}
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
