@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "pm2 start bot.js"
+    "start": "pm2 start ecosystem.config.js",
+    "stop": "pm2 stop all && pm2 delete all"
   },
   "dependencies": {
     "cross-spawn": "^7.0.3",

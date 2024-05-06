@@ -77,14 +77,20 @@ const setStopping = () => {
   serverStatus = "Server is stopping...";
 }
 
+// when error occurs
+const sendError = (err) => {
+  if (!channel) return
+  channel.send("Error: " + err);
+  console.log("Error: ", err);
+}
+
 // shutdown the server
 const shutDown = () => {
   const sshClient = new SshClient();
   sshClient.on('ready', () => {
     sshClient.exec('sudo -i shutdown now', (err, stream) => {
       if (err) {
-        channel.send("Error shutting down server: " + err);
-        console.error('Error:', err);
+        sendError(err)
       };
       stream.on('close', (err, code, signal) => {
         if (err) {
@@ -124,18 +130,18 @@ const regularPolling = setInterval(() => {
 client.on("messageCreate", async (message) => {
   channel = message.channel;
   if (message.content === "!ping") {
-    message.channel.send("Pong.");
+    message.channel.send("Pong!");
   }
   if (message.content === "!help") {
     message.channel.send(`
-    Hello!\n
+    \nHello!\n
     I'm a bot that controls a server. 
     Here are the commands you can use:\n
-    **!ping** - Check if I'm awake\n
-    **!help** - You just did this\n
-    **!start** - Start the server\n
-    **!stop** - Power down the server\n
-    **!restart** - Restart the server`);
+    **!ping** - Check if I'm awake
+    **!help** - You just did this
+    **!start** - Start the server
+    **!stop** - Power down the server
+    **!restart** - Restart the server\n`);
   }
   if (message.content === "!start") {
     wol("60:45:CB:86:3C:C6").then(() => {
