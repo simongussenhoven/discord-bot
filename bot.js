@@ -107,7 +107,7 @@ const shutDown = () => {
           channel.send("Error shutting down server: " + err);
           console.error('Error:', err);
         }
-        client.user.setActivity("Server is shutting down...", { type: ActivityType.Custom });
+        client.user.setActivity("Server is shutting down in 30 seconds...", { type: ActivityType.Custom });
         console.log(`Stream closed with code ${code} and signal ${signal}`);
         sshClient.end();
       });
