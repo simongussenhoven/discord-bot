@@ -98,7 +98,7 @@ const sendError = (err) => {
 const shutDown = () => {
   const sshClient = new SshClient();
   sshClient.on('ready', () => {
-    sshClient.exec('sudo -i shutdown -P +30', (err, stream) => {
+    sshClient.exec('sudo -i shutdown -P +5', (err, stream) => {
       if (err) {
         sendError(err)
       };
