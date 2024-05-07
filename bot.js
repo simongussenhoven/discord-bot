@@ -154,6 +154,12 @@ client.on("messageCreate", async (message) => {
     **!restart** - Restart the server\n`);
   }
   if (message.content === "!start") {
+    if (serverStatus === "Server is online" || serverStatus === "Server is starting...") {
+      message.channel.send(
+        serverStatus === "Server is online" ? "Server is already online!" : "Server is starting..."
+      );
+      return;
+    }
     wol("60:45:CB:86:3C:C6").then(() => {
       message.channel.send("Starting server, please wait...");
       serverIsStarting = true
@@ -161,6 +167,12 @@ client.on("messageCreate", async (message) => {
     setStarting();
   }
   if (message.content === "!stop") {
+    if (serverStatus === "Server is offline" || serverStatus === "Server is stopping...") {
+      message.channel.send(
+        serverStatus === "Server is offline" ? "Server is already offline!" : "Server is stopping..."
+      );
+      return;
+    }
     message.channel.send("Stopping the server...");
     setStopping();
     shutDown();
