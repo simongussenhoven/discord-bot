@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "pm2 start ecosystem.config.js",
+    "start": "pm2 start ecosystem.config.js --no-autorestart",
     "stop": "pm2 kill"
   },
   "dependencies": {
