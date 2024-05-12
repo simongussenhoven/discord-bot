@@ -107,12 +107,33 @@ const shutDown = () => {
           channel.send("Error shutting down server: " + err);
           console.error('Error:', err);
         }
-        client.user.setActivity("Server is shutting down in 30 seconds...", { type: ActivityType.Custom });
+        client.user.setActivity("Server is shutting down in 5 seconds...", { type: ActivityType.Custom });
         console.log(`Stream closed with code ${code} and signal ${signal}`);
         sshClient.end();
       });
     });
   }).connect(sshConfig);
+}
+
+const restart = () => {
+  const sshClient = new SshClient();
+  sshClient.on('ready', () => {
+    sshClient.exec('sudo -i shutdown -r +5', (err, stream) => {
+      if (err) {
+        sendError(err)
+      };
+      stream.on('close', (err, code, signal) => {
+        if (err) {
+          channel.send("Error restarting server: " + err);
+          console.error('Error:', err);
+        }
+        client.user.setActivity("Server is restarting in 5 seconds...", { type: ActivityType.Custom });
+        console.log(`Stream closed with code ${code} and signal ${signal}`);
+        sshClient.end();
+      });
+    });
+  }).connect(sshConfig);
+
 }
 
 // catch ssh error
@@ -162,9 +183,21 @@ client.on("messageCreate", async (message) => {
   }
   if (message.content === "!start") {
     if (serverStatus === "Server is online" || serverStatus === "Server is starting..." || serverStatus === "Server is stopping...") {
-      if (serverStatus === "Server is online") message.channel.send("Server is already online!");
-      if (serverStatus === "Server is starting...") message.channel.send("Server is already starting!");
-      if (serverStatus === "Server is stopping...") message.channel.send("Server is stopping, please wait...");
+      if (serverStatus === "Server is online") {
+        message.channel.send("Error: server is already online!");
+        console.log("Trying to start server while it's already online")
+        return
+      };
+      if (serverStatus === "Server is starting...") {
+        message.channel.send("Error: server is already starting!")
+        console.log("Trying to start server while it's already starting")
+        return
+      };
+      if (serverStatus === "Server is stopping...") {
+        message.channel.send("Error: server is stopping, please wait...")
+        console.log("Trying to start server while it's stopping")
+        return
+      };
       return;
     }
     wol("60:45:CB:86:3C:C6").then(() => {
@@ -175,16 +208,44 @@ client.on("messageCreate", async (message) => {
   }
   if (message.content === "!stop") {
     if (serverStatus === "Server is offline" || serverStatus === "Server is stopping..." || serverStatus === "Server is starting...") {
-      if (serverStatus === "Server is offline") message.channel.send("Server is already offline!");
-      if (serverStatus === "Server is stopping...") message.channel.send("Server is already stopping!");
-      if (serverStatus === "Server is starting...") message.channel.send("Server is starting, please wait...");
+      if (serverStatus === "Server is offline") {
+        message.channel.send("Erro: server is already offline!");
+        console.log("Trying to stop server while it's already offline");
+        return
+      };
+      if (serverStatus === "Server is stopping...") {
+        message.channel.send("Error: server is already stopping!");
+        console.log("Trying to stop server while it's already stopping");
+        return
+      };
+      if (serverStatus === "Server is starting...") {
+        message.channel.send("Error: server is starting, please wait...");
+        console.log("Trying to stop server while it's starting");
+        return
+      };
       return;
     }
     message.channel.send("Stopping the server...");
+    console.log("Stopping the server...");
     setStopping();
     shutDown();
   }
   if (message.content === "!restart") {
-    message.channel.send("Restarting the server...");
+    if (serverStatus === "Server is starting..." || serverStatus === "Server is stopping...") {
+      if (serverStatus === "Server is starting...") {
+        message.channel.send("Error: server is starting, please wait...");
+        console.log("Trying to restart server while it's starting");
+        return
+      };
+      if (serverStatus === "Server is stopping...") {
+        message.channel.send("Error: server is stopping, please wait...");
+        console.log("Trying to restart server while it's stopping");
+        return
+      };
+      restart();
+      message.channel.send("Restarting the server...");
+      console.log("Restarting the server...");
+      return;
+    }
   }
 });
