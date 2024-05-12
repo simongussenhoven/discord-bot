@@ -120,10 +120,8 @@ client.on('error', (err) => {
   console.error('Error:', err);
 });
 
-
-// polling server
-console.log('Start polling')
-const regularPolling = setInterval(() => {
+// function to ping host to check status
+const pingHost = () => {
   const session = ping.createSession(options);
   session.pingHost("192.168.2.99", (error, target) => {
     if (error) {
@@ -134,6 +132,15 @@ const regularPolling = setInterval(() => {
     console.log(`Server is online (${new Date().toISOString()})`);
     setOnline();
   });
+}
+
+// ping host once when bot starts
+pingHost();
+
+// polling server
+console.log('Start polling')
+const regularPolling = setInterval(() => {
+  pingHost();
 }, 15000);
 
 // handle messages
@@ -154,10 +161,10 @@ client.on("messageCreate", async (message) => {
     **!restart** - Restart the server\n`);
   }
   if (message.content === "!start") {
-    if (serverStatus === "Server is online" || serverStatus === "Server is starting...") {
-      message.channel.send(
-        serverStatus === "Server is online" ? "Server is already online!" : "Server is starting..."
-      );
+    if (serverStatus === "Server is online" || serverStatus === "Server is starting..." || serverStatus === "Server is stopping...") {
+      if (serverStatus === "Server is online") message.channel.send("Server is already online!");
+      if (serverStatus === "Server is starting...") message.channel.send("Server is already starting!");
+      if (serverStatus === "Server is stopping...") message.channel.send("Server is stopping, please wait...");
       return;
     }
     wol("60:45:CB:86:3C:C6").then(() => {
@@ -167,10 +174,10 @@ client.on("messageCreate", async (message) => {
     setStarting();
   }
   if (message.content === "!stop") {
-    if (serverStatus === "Server is offline" || serverStatus === "Server is stopping...") {
-      message.channel.send(
-        serverStatus === "Server is offline" ? "Server is already offline!" : "Server is stopping..."
-      );
+    if (serverStatus === "Server is offline" || serverStatus === "Server is stopping..." || serverStatus === "Server is starting...") {
+      if (serverStatus === "Server is offline") message.channel.send("Server is already offline!");
+      if (serverStatus === "Server is stopping...") message.channel.send("Server is already stopping!");
+      if (serverStatus === "Server is starting...") message.channel.send("Server is starting, please wait...");
       return;
     }
     message.channel.send("Stopping the server...");

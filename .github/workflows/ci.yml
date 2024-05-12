@@ -8,14 +8,14 @@ jobs:
   main:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          clean: false
+      # - uses: actions/checkout@v4
+      #   with:
+      #     fetch-depth: 0
+      #     clean: false
       - uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
       - run: npm i
       - run: npm run stop
-      - run: npm run  start
+      - run: npm run start
