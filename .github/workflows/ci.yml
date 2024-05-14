@@ -16,6 +16,14 @@ jobs:
         with:
           node-version: 20
           cache: "npm"
+      - run: |
+        pm2 list
+        if [ $? -eq 0 ]; then
+          pm2 stop all
+          pm2 delete all
+        else
+          echo "No processes running, nothing to stop or delete."
+        fi
       - run: npm i
-      - run: npm run stop
+      - run: npm ci
       - run: npm run start
