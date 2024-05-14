@@ -56,7 +56,7 @@ let channel = null;
 // set the server status to online
 const setOnline = () => {
   if (serverStatus === "Server is online" || serverStatus === "Server is stopping...") return;
-  if (!client) return
+  if (!client?.user) return
   client.user.setPresence({ status: "online" })
   client.user.setActivity("Server is online", { type: ActivityType.Custom });
   serverStatus = `Server is online`;
@@ -67,7 +67,7 @@ const setOnline = () => {
 // set the server status to offline
 const setOffline = () => {
   if (serverStatus === "Server is offline" || serverStatus === "Server is starting...") return;
-  if (!client) return
+  if (!client?.user) return
   client.user.setPresence({ status: "idle"})
   client.user.setActivity(`Server is offline`, { type: ActivityType.Custom });
   serverStatus = "Server is offline";
@@ -78,7 +78,7 @@ const setOffline = () => {
 // set the server status to restarting
 const setStarting = () => {
   if (serverStatus === "Server is starting") return;
-  if (!client) return
+  if (!client?.user) return
   client.user.setActivity("Server is starting...", { type: ActivityType.Custom });
   serverStatus = "Server is starting...";
 }
@@ -86,7 +86,7 @@ const setStarting = () => {
 // set the server status to stopping
 const setStopping = () => {
   if (serverStatus === "Server is stopping") return;
-  if (!client) return
+  if (!client?.user) return
   client.user.setActivity("Server is stopping...", { type: ActivityType.Custom });
   serverStatus = "Server is stopping...";
 }
