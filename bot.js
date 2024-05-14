@@ -171,6 +171,7 @@ client.on("messageCreate", async (message) => {
   channel = message.channel;
   if (message.content === "!ping") {
     message.channel.send("Pong!");
+    console.log(`${message.user.username} pinged the bot`)
   }
   if (message.content === "!help") {
     message.channel.send(`
@@ -182,28 +183,30 @@ client.on("messageCreate", async (message) => {
     **!start** - Start the server
     **!stop** - Power down the server
     **!restart** - Restart the server\n`);
+    console.log(`${message.user.username} asked for help`)
   }
   if (message.content === "!start") {
     if (serverStatus === "Server is online" || serverStatus === "Server is starting..." || serverStatus === "Server is stopping...") {
       if (serverStatus === "Server is online") {
         message.channel.send("Error: server is already online!");
-        console.log("Trying to start server while it's already online")
+        console.log(`${message.user.username} tried to start server while it's online`)
         return
       };
       if (serverStatus === "Server is starting...") {
         message.channel.send("Error: server is already starting!")
-        console.log("Trying to start server while it's already starting")
+        console.log(`${message.user.username} tried to start server while it's starting`)
         return
       };
       if (serverStatus === "Server is stopping...") {
         message.channel.send("Error: server is stopping, please wait...")
-        console.log("Trying to start server while it's stopping")
+        console.log(`${message.user.username} tried to start server while it's stopping`)
         return
       };
       return;
     }
     wol("60:45:CB:86:3C:C6").then(() => {
       message.channel.send("Starting server, please wait...");
+      console.log(`${message.user.username} started the server`)
       serverIsStarting = true
     });
     setStarting();
@@ -211,24 +214,24 @@ client.on("messageCreate", async (message) => {
   if (message.content === "!stop") {
     if (serverStatus === "Server is offline" || serverStatus === "Server is stopping..." || serverStatus === "Server is starting...") {
       if (serverStatus === "Server is offline") {
-        message.channel.send("Erro: server is already offline!");
-        console.log("Trying to stop server while it's already offline");
+        message.channel.send("Error: server is already offline!");
+        console.log(`${message.user.username} tried to stop server while it's offline`);
         return
       };
       if (serverStatus === "Server is stopping...") {
         message.channel.send("Error: server is already stopping!");
-        console.log("Trying to stop server while it's already stopping");
+        console.log(`${message.user.username} tried to stop server while it's stopping`);
         return
       };
       if (serverStatus === "Server is starting...") {
         message.channel.send("Error: server is starting, please wait...");
-        console.log("Trying to stop server while it's starting");
+        console.log(`${message.user.username} tried to stop server while it's starting`);
         return
       };
       return;
     }
     message.channel.send("Stopping the server...");
-    console.log("Stopping the server...");
+    console.log(`${message.user.username} stopped the server`);
     setStopping();
     shutDown();
   }
@@ -236,17 +239,17 @@ client.on("messageCreate", async (message) => {
     if (serverStatus === "Server is starting..." || serverStatus === "Server is stopping...") {
       if (serverStatus === "Server is starting...") {
         message.channel.send("Error: server is starting, please wait...");
-        console.log("Trying to restart server while it's starting");
+        console.log(`${message.user.username} tried to restart server while it's starting`)
         return
       };
       if (serverStatus === "Server is stopping...") {
         message.channel.send("Error: server is stopping, please wait...");
-        console.log("Trying to restart server while it's stopping");
+        console.log(`${message.user.username} tried to restart server while it's stopping`)
         return
       };
       restart();
       message.channel.send("Restarting the server...");
-      console.log("Restarting the server...");
+      console.log(`${message.user.username} restarted the server`);
       return;
     }
   }
