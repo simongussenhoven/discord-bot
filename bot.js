@@ -156,7 +156,9 @@ const pingHost = () => {
 }
 
 // ping host once when bot starts
-pingHost();
+setTimeout(() => {
+  pingHost();
+}, 5000)
 
 // polling server
 console.log('Start polling')
