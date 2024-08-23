@@ -40,7 +40,6 @@ const sshConfig = {
   host: '192.168.2.99',
   port: 22, // Default SSH port
   username: 'sshuser',
-  password: process.env.SSH_PASS
 };
 
 // client starting
@@ -119,7 +118,7 @@ const shutDown = () => {
   }).connect(sshConfig);
 }
 
-const restart = () => {
+const restart = async () => {
   const sshClient = new SshClient();
   sshClient.on('ready', () => {
     sshClient.exec('sudo -i shutdown -r +5', (err, stream) => {
@@ -136,7 +135,9 @@ const restart = () => {
         sshClient.end();
       });
     });
-  }).connect(sshConfig);
+  }).connect(sshConfig).error((err) => {
+    sendError(err)
+  })
 
 }
 
@@ -216,7 +217,7 @@ client.on("messageCreate", async (message) => {
     setStarting();
   }
   if (message.content === "!stop") {
-    if (serverStatus === "Server is offline" || serverStatus === "Server is stopping..." || serverStatus === "Server is starting...") {
+    if (serverStatus === "Server is offline" || serverStatus === "Server is stopping...") {
       if (serverStatus === "Server is offline") {
         message.channel.send("Error: server is already offline!");
         console.log(`${message.author} tried to stop server while it's offline`);
