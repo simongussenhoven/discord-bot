@@ -99,21 +99,42 @@ const sendError = (err) => {
 // shutdown the server
 const shutDown = () => {
   const sshClient = new SshClient();
+  
   sshClient.on('ready', () => {
     sshClient.exec('sudo -i shutdown -P +5', (err, stream) => {
       if (err) {
-        sendError(err)
-      };
-      stream.on('close', (err, code, signal) => {
-        if (err) {
-          channel.send("Error shutting down server: " + err);
-          console.error('Error:', err);
-        }
+        sendError(err);
+        sshClient.end();
+        return;
+      }
+
+      stream.on('close', (code, signal) => {
+        // Log the shutdown initiation
+        console.log(`Shutdown command sent. Stream closed with code ${code} and signal ${signal}`);
         client.user.setActivity("Server is shutting down in 5 seconds...", { type: ActivityType.Custom });
-        console.log(`Stream closed with code ${code} and signal ${signal}`);
+
+        // Close the SSH connection gracefully
         sshClient.end();
       });
+
+      // Handle potential stream errors
+      stream.on('error', (err) => {
+        console.error('Stream Error:', err);
+        sendError(err);
+        sshClient.end();
+      });
+
+      // It's optional to consume the stream's output
+      stream.on('data', (data) => {
+        console.log('STDOUT: ' + data);
+      }).stderr.on('data', (data) => {
+        console.log('STDERR: ' + data);
+      });
     });
+  }).on('error', (err) => {
+    // Handle SSH connection errors
+    console.error('SSH Connection Error:', err);
+    sendError(err);
   }).connect(sshConfig);
 }
 
@@ -188,7 +209,7 @@ client.on("messageCreate", async (message) => {
     console.log(`${message.author} asked for help`)
   }
   if (message.content === "!start") {
-    if (serverStatus === "Server is online" || serverStatus === "Server is starting..." || serverStatus === "Server is stopping...") {
+    if (serverStatus === "Server is online" || serverStatus === "Server is starting..." || serverStatus === "Server is shutting down...") {
       if (serverStatus === "Server is online") {
         message.channel.send("Error: server is already online!");
         console.log(`${message.author} tried to start server while it's online`)
@@ -213,6 +234,17 @@ client.on("messageCreate", async (message) => {
     });
     setStarting();
   }
+
+  if (message.content === "!status") {
+    const response = await fetch('http://192.168.2.99:5000')
+    if (!response.ok) {
+      message.channel.send("Server is offline");
+      console.log(`${message.author} checked the server status: offline`)
+      return
+    }
+    message.channel.send("Server is online");
+  }
+
   if (message.content === "!stop") {
     if (serverStatus === "Server is offline" || serverStatus === "Server is stopping...") {
       if (serverStatus === "Server is offline") {
@@ -232,6 +264,9 @@ client.on("messageCreate", async (message) => {
       };
       return;
     }
+    // close ssh connection
+
+
     message.channel.send("Stopping the server...");
     console.log(`${message.author} stopped the server`);
     setStopping();
