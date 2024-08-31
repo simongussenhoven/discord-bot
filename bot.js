@@ -1,7 +1,6 @@
 const { Client, GatewayIntentBits, ActivityType } = require("discord.js");
 const dotenv = require("dotenv");
 const wol = require("wakeonlan");
-const ping = require("net-ping");
 const { Client: SshClient } = require('ssh2');
 
 dotenv.config();
@@ -27,14 +26,14 @@ const client = new Client({
   ],
 });
 
-const options = {
-  networkProtocol: ping.NetworkProtocol.IPv4,
-  packetSize: 16,
-  retries: 1,
-  sessionId: process.pid % 65535,
-  timeout: 2000,
-  ttl: 128,
-};
+// const options = {
+//   networkProtocol: ping.NetworkProtocol.IPv4,
+//   packetSize: 16,
+//   retries: 1,
+//   sessionId: process.pid % 65535,
+//   timeout: 2000,
+//   ttl: 128,
+// };
 
 const sshConfig = {
   host: '192.168.2.99',
@@ -147,17 +146,15 @@ client.on('error', (err) => {
 });
 
 // function to ping host to check status
-const pingHost = () => {
-  const session = ping.createSession(options);
-  session.pingHost("192.168.2.99", (error, target) => {
-    if (error) {
-      console.log(`Server is offline (${new Date().toISOString()})`);
-      setOffline();
-      return;
-    }
-    console.log(`Server is online (${new Date().toISOString()})`);
-    setOnline();
-  });
+const pingHost = async () => {
+  const response = await fetch('http://192.168.2.99:5000');
+  if (!response.ok) {
+    console.log(new Date().toTimeString() + ': Server is offline');
+    setOffline();
+    return
+  }
+  console.log(new Date().toTimeString() + ': Server is online');
+  setOnline();
 }
 
 // ping host once when bot starts
@@ -175,7 +172,7 @@ const regularPolling = setInterval(() => {
 client.on("messageCreate", async (message) => {
   channel = message.channel;
   if (message.content === "!ping") {
-    message.channel.send("Pong!");
+    message.channel.send("This bot is online!");
     console.log(`${message.author} pinged the bot`)
   }
   if (message.content === "!help") {
