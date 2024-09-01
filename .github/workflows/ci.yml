@@ -26,5 +26,4 @@ jobs:
             echo "No processes running, nothing to stop or delete."
           fi
       - run: npm i
-      - run: npm ci
       - run: npm run start
