@@ -35,66 +35,66 @@ const client = new Client({
 //   ttl: 128,
 // };
 
-const sshConfig = {
-  host: '192.168.2.99',
-  port: 22, // Default SSH port
-  username: 'sshuser',
-};
+// const sshConfig = {
+//   host: '192.168.2.99',
+//   port: 22, // Default SSH port
+//   username: 'sshuser',
+// };
 
 // client starting
-client.once("ready", () => {
-  console.log("Starting bot...");
-});
-client.login(process.env.TOKEN);
+// client.once("ready", () => {
+//   console.log("Starting bot...");
+// });
+// client.login(process.env.TOKEN);
 
 // when the bot starts, the server status is unknown
-let serverStatus = "unknown";
-let channel = null;
+// let serverStatus = "unknown";
+// let channel = null;
 
 // set the server status to online
-const setOnline = () => {
-  if (serverStatus === "Server is online" || serverStatus === "Server is stopping...") return;
-  if (!client || !client.user) return
-  client.user.setPresence({ status: "online" })
-  client.user.setActivity("Server is online", { type: ActivityType.Custom });
-  serverStatus = `Server is online`;
-  if (!channel) return
-  channel.send("Server is online!");
-};
+// const setOnline = () => {
+//   if (serverStatus === "Server is online" || serverStatus === "Server is stopping...") return;
+//   if (!client || !client.user) return
+//   client.user.setPresence({ status: "online" })
+//   client.user.setActivity("Server is online", { type: ActivityType.Custom });
+//   serverStatus = `Server is online`;
+//   if (!channel) return
+//   channel.send("Server is online!");
+// };
 
-// set the server status to offline
-const setOffline = () => {
-  if (serverStatus === "Server is offline" || serverStatus === "Server is starting...") return;
-  if (!client || !client.user) return
-  client.user.setPresence({ status: "idle"})
-  client.user.setActivity(`Server is offline`, { type: ActivityType.Custom });
-  serverStatus = "Server is offline";
-  if (!channel) return
-  channel.send("Server is offline!");
-};
+// // set the server status to offline
+// const setOffline = () => {
+//   if (serverStatus === "Server is offline" || serverStatus === "Server is starting...") return;
+//   if (!client || !client.user) return
+//   client.user.setPresence({ status: "idle"})
+//   client.user.setActivity(`Server is offline`, { type: ActivityType.Custom });
+//   serverStatus = "Server is offline";
+//   if (!channel) return
+//   channel.send("Server is offline!");
+// };
 
 // set the server status to restarting
-const setStarting = () => {
-  if (serverStatus === "Server is starting") return;
-  if (!client || !client.user) return
-  client.user.setActivity("Server is starting...", { type: ActivityType.Custom });
-  serverStatus = "Server is starting...";
-}
+// const setStarting = () => {
+//   if (serverStatus === "Server is starting") return;
+//   if (!client || !client.user) return
+//   client.user.setActivity("Server is starting...", { type: ActivityType.Custom });
+//   serverStatus = "Server is starting...";
+// }
 
-// set the server status to stopping
-const setStopping = () => {
-  if (serverStatus === "Server is stopping") return;
-  if (!client || !client.user) return
-  client.user.setActivity("Server is stopping...", { type: ActivityType.Custom });
-  serverStatus = "Server is stopping...";
-}
+// // set the server status to stopping
+// const setStopping = () => {
+//   if (serverStatus === "Server is stopping") return;
+//   if (!client || !client.user) return
+//   client.user.setActivity("Server is stopping...", { type: ActivityType.Custom });
+//   serverStatus = "Server is stopping...";
+// }
 
 // when error occurs
-const sendError = (err) => {
-  if (!channel) return
-  channel.send("Error: " + err);
-  console.log("Error: ", err);
-}
+// const sendError = (err) => {
+//   if (!channel) return
+//   channel.send("Error: " + err);
+//   console.log("Error: ", err);
+// }
 
 // shutdown the server
 const shutDown = () => {
@@ -264,8 +264,6 @@ client.on("messageCreate", async (message) => {
       };
       return;
     }
-    // close ssh connection
-
 
     message.channel.send("Stopping the server...");
     console.log(`${message.author} stopped the server`);
