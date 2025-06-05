@@ -6,5 +6,7 @@ export const sshConfig = () => {
         host: '192.168.2.99',
         port: 22, // Default SSH port
         username: process.env.SSH_USER,
+        password: process.env.SSH_PASS,
+        debug: console.log
     }
 };
