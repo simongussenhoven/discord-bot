@@ -3,7 +3,7 @@
 module.exports = {
   apps : [{
     name   : "bot",
-    script: "./bot.ts",
+    script: "./bot.js",
     autorestart: false
   }]
 }
