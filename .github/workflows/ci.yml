@@ -24,8 +24,8 @@ jobs:
         run: |
           echo "NODE_ENV=production" >> .env
           echo "TOKEN"=${{ secrets.TOKEN }}" >> .env
-          echo "SSH_USER=${{ secrets.SSH_USER }}" >> .env
-          echo "SSH_PASS=${{ secrets.SSH_PASS }}" >> .env
+          echo "SSH_USER"=${{ secrets.SSH_USER }}" >> .env
+          echo "SSH_PASS"=${{ secrets.SSH_PASS }}" >> .env
 
       - run: npm run build
       - run: npm run start
