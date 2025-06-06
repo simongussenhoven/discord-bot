@@ -12,43 +12,42 @@ const client = initClient();
 let serverStatus: ServerStatus = ServerStatus.UNKNOWN;
 let channel = null as any;
 
+const setDiscordStatus = async (status: ServerStatus) => {
+    if (!channel) {
+        console.error("Channel is not set. Cannot update status.");
+        return;
+    }
+    switch (status) {
+        case ServerStatus.ONLINE:
+            await channel.client.user?.setPresence({ status: "online" });
+            await channel.client.user?.setActivity("Server is online", { type: "CUSTOM" });
+            await channel.send("Server is online!");
+            break;
+        case ServerStatus.OFFLINE:
+            await channel.client.user?.setPresence({ status: "dnd" });
+            await channel.client.user?.setActivity("Server is offline", { type: "CUSTOM" });
+            await channel.send("Server is offline!");
+            break;
+        default:
+            console.error("Unknown server status.");
+    }
+}
+
 client.once("ready", async () => {
     console.log("Bot was started successfully!");
-    serverStatus = await getServerStatus(serverStatus, channel);
 });
+
 client.login(process.env.TOKEN);
 
 setInterval(async () => {
-    serverStatus = await getServerStatus(serverStatus, channel);
+    const status = await getServerStatus();
+    if (serverStatus !== status) {
+        serverStatus = status;
+        setDiscordStatus(serverStatus);
+    };
 }, 10000);
 
-console.log("Adding messageCreate listener...");
-
 client.on("messageCreate", (message: Message) => {
-    console.log(`Message received: ${message.content}`);
     channel = message.channel;
     readMessage(message, serverStatus, client);
 });
-// import { Client, GatewayIntentBits } from 'discord.js';
-// import dotenv from 'dotenv';
-
-// dotenv.config();
-
-// const client = new Client({
-//     intents: [
-//         GatewayIntentBits.Guilds,
-//         GatewayIntentBits.GuildMessages,
-//         GatewayIntentBits.MessageContent,
-//         GatewayIntentBits.DirectMessages,
-//     ]
-// });
-
-// client.on('ready', () => {
-//     console.log(`🤖 Logged in as ${client.user?.tag}`);
-// });
-
-// client.on('messageCreate', (message) => {
-//     console.log(`📩 Message from ${message.author.username}: ${message.content}`);
-// });
-
-// client.login(process.env.TOKEN);

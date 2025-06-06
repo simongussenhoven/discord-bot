@@ -11,17 +11,13 @@ export const stopServer = (message: Message, client: any) => {
 
         sshClient.exec('sudo -i shutdown -h now', (err: Error, stream: any) => {
             if (err) {
-                console.log('(SSH Connection error)', err);
+                console.error('(SSH Connection error)', err);
                 sendError(message, String(`(SSH client connection error) ${err}`));
                 sshClient.end();
                 return;
             }
 
             stream.on('close', (code: any, signal: any) => {
-                // Log the shutdown initiation
-                console.log(`Shutdown command sent. Stream closed with code ${code} and signal ${signal}`);
-                client.user.setActivity("Server is shutting down in 5 seconds...", { type: ActivityType.Custom });
-
                 // Close the SSH connection gracefully
                 sshClient.end();
             });

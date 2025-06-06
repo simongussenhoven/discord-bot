@@ -3,26 +3,29 @@ import { ServerStatus } from "../types";
 import { stopServer } from "./stopServer";
 import { sendError } from "./sendError";
 import { startServer } from "./startServer";
+import { getServerStatus } from "./getServerStatus";
 
 export const readMessage = (message: Message, serverStatus: ServerStatus, client: any) => {
-    // prevent the bot responding to itself and if
-    console.log(`Received message from ${message.author.username}: ${message.content}`);
+    // prevent the bot responding to itself
     if (message.author.id === client.user || message.author.bot) return;
-
-    console.log(`Message received: ${message.content}`);
     if (!message.channel) return sendError(message, "No channel found.");
-    if (message.content === "!status") return message.channel.send("Bot is online!")
     if (message.content === "!help") return sendHelp(message);
     if (message.content === "!stop") return onStop(serverStatus, message, client);
     if (message.content === "!start") return onStart(serverStatus, message, client);
+    if (message.content === "!restart") {
+        if (serverStatus === ServerStatus.ONLINE) {
+            stopServer(message, client);
+            setTimeout(() => startServer(message), 5000); // wait 5 seconds before starting again
+        } else {
+            sendError(message, "Server is not online, cannot restart.");
+        }
+    }
     else {
-        console.log(`Command not recognized: ${message.content}`);
         return message.channel.send("Command not recognized. Type !help for a list of commands.");
     }
 }
 
 const onStart = (serverStatus: ServerStatus, message: Message, client: any) => {
-    console.log('Starting server...');
     if (serverStatus === ServerStatus.STARTING) sendError(message, "Server is already starting.");
     if (serverStatus === ServerStatus.STOPPING) sendError(message, "Server is stopping, please wait before starting.");
     if (serverStatus === ServerStatus.ONLINE) sendError(message, "Server is already online.");
@@ -37,14 +40,12 @@ const onStop = (serverStatus: ServerStatus, message: Message, client: any) => {
 }
 
 const sendHelp = (message: Message) => {
-    message.channel.send(`
-  \nHello!\n
+    message.channel.send(`\n
   I'm a bot that controls a server. 
   Here are the commands you can use:\n
-  **!ping** - Check if I'm awake
   **!help** - You just did this
   **!start** - Start the server
   **!stop** - Power down the server
-  **!restart** - Restart the server\n`);
-    console.log(`${message.author.globalName} asked for help`)
+  **!restart** - Restart the server\n
+  **!status** - Get the current status of the server\n`);
 }
