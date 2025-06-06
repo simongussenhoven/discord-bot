@@ -2,7 +2,7 @@
 const dotenv = require("dotenv");
 import { ServerStatus } from './types';
 import { getServerStatus, setOnline } from './functions'
-import { Message } from 'discord.js';
+import { ChannelType, Message } from 'discord.js';
 import { checkEnv, initClient, readMessage } from './functions';
 
 dotenv.config();
@@ -48,6 +48,9 @@ setInterval(async () => {
 }, 10000);
 
 client.on("messageCreate", (message: Message) => {
-    channel = message.channel;
+    // only set channel if its a DM
+    if (message.channel.type === ChannelType.DM) {
+        channel = message.channel;
+    }
     readMessage(message, serverStatus, client);
 });

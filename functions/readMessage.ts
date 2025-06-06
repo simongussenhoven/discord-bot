@@ -3,7 +3,6 @@ import { ServerStatus } from "../types";
 import { stopServer } from "./stopServer";
 import { sendError } from "./sendError";
 import { startServer } from "./startServer";
-import { getServerStatus } from "./getServerStatus";
 
 export const readMessage = (message: Message, serverStatus: ServerStatus, client: any) => {
     // prevent the bot responding to itself
@@ -12,14 +11,6 @@ export const readMessage = (message: Message, serverStatus: ServerStatus, client
     if (message.content === "!help") return sendHelp(message);
     if (message.content === "!stop") return onStop(serverStatus, message, client);
     if (message.content === "!start") return onStart(serverStatus, message, client);
-    if (message.content === "!restart") {
-        if (serverStatus === ServerStatus.ONLINE) {
-            stopServer(message, client);
-            setTimeout(() => startServer(message), 5000); // wait 5 seconds before starting again
-        } else {
-            sendError(message, "Server is not online, cannot restart.");
-        }
-    }
     else {
         return message.channel.send("Command not recognized. Type !help for a list of commands.");
     }
@@ -45,7 +36,5 @@ const sendHelp = (message: Message) => {
   Here are the commands you can use:\n
   **!help** - You just did this
   **!start** - Start the server
-  **!stop** - Power down the server
-  **!restart** - Restart the server\n
-  **!status** - Get the current status of the server\n`);
+  **!stop** - Power down the server\n`);
 }
