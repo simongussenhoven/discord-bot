@@ -48,9 +48,7 @@ setInterval(async () => {
 }, 10000);
 
 client.on("messageCreate", (message: Message) => {
-    // only set channel if its a DM
-    if (message.channel.type === ChannelType.DM) {
-        channel = message.channel;
-    }
+    if (message.channel.type !== ChannelType.DM) return
+    channel = message.channel;
     readMessage(message, serverStatus, client);
 });
