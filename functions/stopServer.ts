@@ -6,7 +6,6 @@ import { sshConfig } from "../config";
 export const stopServer = (message: Message, client: any) => {
     console.log('Stopping server...');
     const sshClient = new SshClient();
-    console.log('Connecting with config: ' + JSON.stringify(sshConfig()));
     sshClient.on('ready', () => {
 
         sshClient.exec('sudo -i shutdown -h now', (err: Error, stream: any) => {
