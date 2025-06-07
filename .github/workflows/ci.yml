@@ -28,6 +28,7 @@ jobs:
           echo "SSH_PASS=${{ secrets.SSH_PASS }}" >> .env
       - run: npm run build
       - run: npm run start
+      - run: npm run save
         env:
           NODE_ENV: production
           TOKEN: ${{ secrets.TOKEN }}

@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "pm2 start ecosystem.config.js --no-autorestart",
+    "start": "pm2 restart ecosystem.config.js || pm2 start ecosystem.config.js",
+    "save": "pm2 save",
     "stop": "pm2 stop ecosystem.config.js",
     "dev": "nodemon --exec ts-node bot.ts",
     "build": "npx tsc"
