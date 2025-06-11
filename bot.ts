@@ -2,7 +2,7 @@
 const dotenv = require("dotenv");
 import { ServerStatus } from './types';
 import { getServerStatus, setOnline } from './functions'
-import { ChannelType, Message } from 'discord.js';
+import { ActivityType, ChannelType, Message } from 'discord.js';
 import { checkEnv, initClient, readMessage } from './functions';
 
 dotenv.config();
@@ -20,12 +20,12 @@ const setDiscordStatus = async (status: ServerStatus) => {
     switch (status) {
         case ServerStatus.ONLINE:
             await channel.client.user?.setPresence({ status: "online" });
-            await channel.client.user?.setActivity("Server is online", { type: "CUSTOM" });
+            await channel.client.user?.setActivity("Server is online", { type: ActivityType.Custom });
             await channel.send("Server is online!");
             break;
         case ServerStatus.OFFLINE:
             await channel.client.user?.setPresence({ status: "dnd" });
-            await channel.client.user?.setActivity("Server is offline", { type: "CUSTOM" });
+            await channel.client.user?.setActivity("Server is offline", { type: ActivityType.Custom });
             await channel.send("Server is offline!");
             break;
         default:
@@ -39,15 +39,23 @@ client.once("ready", async () => {
 
 client.login(process.env.TOKEN);
 
-setInterval(async () => {
+const checkServerStatus = async () => {
     const status = await getServerStatus();
     if (serverStatus !== status) {
+        console.log(`Server status changed: ${serverStatus} -> ${status}`);
         serverStatus = status;
         setDiscordStatus(serverStatus);
     };
+    return status;
+}
+
+checkServerStatus();
+
+setInterval(() => {
+    checkServerStatus()
 }, 10000);
 
-client.on("messageCreate", (message: Message) => {
+client.on("messageCreate", async (message: Message) => {
     if (message.channel.type !== ChannelType.DM) return
     channel = message.channel;
     readMessage(message, serverStatus, client);
