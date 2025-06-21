@@ -2,9 +2,13 @@ import { ActivityType, Message } from "discord.js";
 const { Client: SshClient } = require('ssh2');
 import { sendError } from './sendError'
 import { sshConfig } from "../config";
+import { DateTime } from "luxon";
 
-export const stopServer = (message: Message, client: any) => {
-    console.log('Stopping server...');
+
+
+export const stopServer = (message: Message) => {
+    const currentTime = DateTime.now().toLocaleString(DateTime.DATETIME_MED);
+    message.channel.send(`🛑 Stopping server at ${currentTime}, please wait...`);
     const sshClient = new SshClient();
     sshClient.on('ready', () => {
 

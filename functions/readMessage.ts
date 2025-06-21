@@ -8,11 +8,13 @@ export const readMessage = (message: Message, serverStatus: ServerStatus, client
     // prevent the bot responding to itself
     if (message.author.id === client.user || message.author.bot) return;
     if (!message.channel) return sendError(message, "No channel found.");
+
+    // Check if the message is a command
     if (message.content === "!help") return sendHelp(message);
     if (message.content === "!stop") return onStop(serverStatus, message, client);
     if (message.content === "!start") return onStart(serverStatus, message, client);
     else {
-        return message.channel.send("Command not recognized. Type !help for a list of commands.");
+        return sendHelp(message);
     }
 }
 
@@ -27,14 +29,13 @@ const onStop = (serverStatus: ServerStatus, message: Message, client: any) => {
     if (serverStatus === ServerStatus.STARTING) sendError(message, "Server is starting, please wait before stopping.");
     if (serverStatus === ServerStatus.STOPPING) sendError(message, "Server is already stopping.");
     if (serverStatus === ServerStatus.OFFLINE) sendError(message, "Server is already offline.");
-    if (serverStatus === ServerStatus.ONLINE) stopServer(message, client);
+    if (serverStatus === ServerStatus.ONLINE) stopServer(message);
 }
 
 const sendHelp = (message: Message) => {
     message.channel.send(`\n
   I'm a bot that controls a server. 
   Here are the commands you can use:\n
-  **!help** - You just did this
   **!start** - Start the server
   **!stop** - Power down the server\n`);
 }

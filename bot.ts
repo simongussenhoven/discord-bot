@@ -4,6 +4,7 @@ import { ServerStatus } from './types';
 import { getServerStatus, setOnline } from './functions'
 import { ActivityType, ChannelType, Message } from 'discord.js';
 import { checkEnv, initClient, readMessage } from './functions';
+import { DateTime } from 'luxon';
 
 dotenv.config();
 checkEnv();
@@ -13,6 +14,7 @@ let serverStatus: ServerStatus = ServerStatus.UNKNOWN;
 let channel = null as any;
 
 const setDiscordStatus = async (status: ServerStatus) => {
+    const currentTime = DateTime.now().toLocaleString(DateTime.DATETIME_MED);
     if (!channel) {
         console.error("Channel is not set. Cannot update status.");
         return;
@@ -21,12 +23,12 @@ const setDiscordStatus = async (status: ServerStatus) => {
         case ServerStatus.ONLINE:
             await channel.client.user?.setPresence({ status: "online" });
             await channel.client.user?.setActivity("Server is online", { type: ActivityType.Custom });
-            await channel.send("Server is online!");
+            await channel.send(`✅ Server is online at ${currentTime}!`);
             break;
         case ServerStatus.OFFLINE:
             await channel.client.user?.setPresence({ status: "dnd" });
             await channel.client.user?.setActivity("Server is offline", { type: ActivityType.Custom });
-            await channel.send("Server is offline!");
+            await channel.send(`💀 Server is offline at ${currentTime}.`);
             break;
         default:
             console.error("Unknown server status.");
@@ -42,7 +44,7 @@ client.login(process.env.TOKEN);
 const checkServerStatus = async () => {
     const status = await getServerStatus();
     if (serverStatus !== status) {
-        console.log(`Server status changed: ${serverStatus} -> ${status}`);
+        console.log(`Server status changed: ${ServerStatus[serverStatus]} -> ${ServerStatus[status]}`);
         serverStatus = status;
         setDiscordStatus(serverStatus);
     };
